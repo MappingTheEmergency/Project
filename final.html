@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <title>New Villages in British Malaya (1954)</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.css' rel='stylesheet' />
+    <nav id="menu"></nav>
+    <style>
+
+body {
+        margin: 0;
+        padding: 0;
+      }
+
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+
+      /* Marker tweaks + popup styling */
+.mapboxgl-popup-close-button {
+  display: none;
+}
+
+.mapboxgl-popup-content {
+  font: 200 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+  padding: 0;
+  width: 180px;
+}
+
+.mapboxgl-popup-content-wrapper {
+  padding: 1%;
+}
+
+.mapboxgl-popup-content h3 {
+  background: #000000;
+  color: #fff;
+  margin: 1;
+  display: block;
+  padding: 10px;
+  border-radius: 3px 3px 0 0;
+  font-weight: 700;
+  margin-top: -15px;
+}
+
+.mapboxgl-popup-content h4 {
+  margin: 0;
+  display: block;
+  padding: 10px;
+  font-weight: 400;
+}
+
+.mapboxgl-popup-content div {
+  padding: 10px;
+}
+
+.mapboxgl-container .leaflet-marker-icon {
+  cursor: pointer;
+}
+
+.mapboxgl-popup-anchor-top > .mapboxgl-popup-content {
+  margin-top: 15px;
+}
+
+.mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
+  border-bottom-color: #72a7fd;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+h2,
+h3 {
+  margin: 10px;
+  font-size: 1.2em;
+}
+
+h3 {
+  font-size: 1em;
+}
+
+p {
+  font-size: 0.85em;
+  margin: 10px;
+  text-align: left;
+}
+
+/**
+* Create a position for the map
+* on the page */
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+/**
+* Set rules for how the map overlays
+* (information box and legend) will be displayed
+* on the page. */
+.map-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.8);
+  margin-right: 20px;
+  font-family: Arial, sans-serif;
+  overflow: auto;
+  border-radius: 3px;
+}
+
+#features {
+  top: 0;
+  height: 200px;
+  margin-top: 20px;
+  width: 250px;
+}
+
+#legend {
+  padding: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  line-height: 18px;
+  height: 145px;
+  margin-bottom: 40px;
+  width: 135px;
+}
+
+.legend-key {
+  display: inline-block;
+  border-radius: 20%;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+}
+
+ #menu {
+          background: #fff;
+          position: absolute;
+          z-index: 1;
+          top: 235px;
+          right: 20px;
+          border-radius: 3px;
+          width: 120px;
+          border: 0px solid rgba(0, 0, 0, 0.4);
+          font-family: 'Open Sans', sans-serif;
+        }
+        
+        #menu a {
+          font-size: 13px;
+          color: #404040;
+          display: block;
+          margin: 0;
+          padding: 0;
+          padding: 10px;
+          text-decoration: none;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+          text-align: center;
+          opacity: .7;
+        }
+        
+        #menu a:last-child {
+          border: none;
+        }
+        
+        #menu a:hover {
+          background-color: #d1d1d1;
+          color: #404040;
+        }
+        
+        #menu a.active {
+          background-color: rgba(255, 255, 255, 0.8);
+          color: #000000;
+        }
+        
+        #menu a.active:hover {
+          background: #e9e9e7;
+        }
+
+    </style>
+  </head>
+  <body>
+    <div id='map'></div>
+    <div class='map-overlay' id='features'><h2>Spaces of the Malayan Emergency, 1954</h2><p>Click on Data Points for Additional Information about each New Village, Regrouped Malay Kampong, Labour Regroupment Area, or Detention Camp</p><p>Toggle the Visibility of each Layer in the Panel Below</p></div>
+    <div class='map-overlay' id='legend'></div>
+    <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZGJhaWxsYXJnZTBuIiwiYSI6ImNqeDUwMmR3YTBjNDI0YXBjemExMXlycmQifQ.jLHet4DI0fepIvprmS7kaw'; // replace this with your access token
+    var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/dbaillarge0n/ck7uem4ea2h691iob75x1y71q', // replace this with your style URL
+      center: [102.3,3.95],
+      zoom: 6.6
+    });
+    // code from the next step will go here
+    map.on('click', function(e) {
+  var features = map.queryRenderedFeatures(e.point, {
+    layers: ['new-villages-combined']
+     // replace this with the name of the layer
+  });
+
+  if (!features.length) {
+    return;
+  }
+
+  var feature = features[0];
+
+  var popup = new mapboxgl.Popup({ offset: [0, -15] })
+    .setLngLat(feature.geometry.coordinates)
+    .setHTML('<h3>' + feature.properties.title + '</h3><h4>' + feature.properties.type + '</h4><h4>' + feature.properties.description + '</h4><h4>' + feature.properties.category + '</h4><h4>' + feature.properties.government + '</h4><h4>' + feature.properties.source + '</h4>')
+    .setLngLat(feature.geometry.coordinates)
+    .addTo(map);
+
+});
+ map.on('click', function(e) {
+  var features = map.queryRenderedFeatures(e.point, {
+    layers: ['regrouped-kampongs-combined', 'labour-regroupments-pahang', 'detention-centers-malaya']
+     // replace this with the name of the layer
+  });
+
+  if (!features.length) {
+    return;
+  }
+
+  var feature = features[0];
+
+  var popup = new mapboxgl.Popup({ offset: [0, -15] })
+    .setLngLat(feature.geometry.coordinates)
+    .setHTML('<h3>' + feature.properties.title + '</h3><h4>' + feature.properties.type + '</h4><h4>' + feature.properties.source + '</h4>')
+    .setLngLat(feature.geometry.coordinates)
+    .addTo(map);
+
+});
+    var nav = new mapboxgl.NavigationControl();
+map.addControl(nav, 'top-left');
+
+// pointer cursor
+map.getCanvas().style.cursor = 'default';
+
+// legend
+map.on('load', function() {
+  var layers = ['Black Areas', 'New Villages', 'Regrouped Malay Kampongs', 'Labour Regroupments', 'Detention Camps'];
+var colors = ['#978c8c', '#6da4fd', '#fe7272', '#cfb65e', '#151d0b'];
+for (i = 0; i < layers.length; i++) {
+  var layer = layers[i];
+  var color = colors[i];
+  var item = document.createElement('div');
+  var key = document.createElement('span');
+  key.className = 'legend-key';
+  key.style.backgroundColor = color;
+
+  var value = document.createElement('span');
+  value.innerHTML = layer;
+  item.appendChild(key);
+  item.appendChild(value);
+  legend.appendChild(item);
+}
+
+});
+// toggle layers
+var toggleableLayerName = ['Black Areas', 'New Villages', 'Regrouped Malay Kampongs', 'Labour Regroupments', 'Detention Camps']
+var toggleableLayerIds = ['black-areas', 'new-villages-combined', 'regrouped-kampongs-combined', 'labour-regroupments-pahang', 'detention-centers-malaya'];
+
+for (var i = 0; i < toggleableLayerIds.length; i++) {
+  var id = toggleableLayerIds[i];
+  var name = toggleableLayerName [i];
+
+  var link = document.createElement('a');
+  link.href = '#';
+  link.className = 'active';
+  link.id = id;
+  link.textContent = name;
+
+  link.onclick = function(e) {
+    var clickedLayer = this.id;
+    e.preventDefault();
+    e.stopPropagation();
+
+    var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+    if (visibility === 'visible') {
+      map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+      this.className = '';
+    } else {
+      this.className = 'active';
+      map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+    }
+  };
+
+  var layers = document.getElementById('menu');
+  layers.appendChild(link);
+}
+  
+  // change cursor on hover
+  map.on("mousemove", "new-villages-combined", function(e) {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on("mouseleave", "new-villages-combined", function() {
+        map.getCanvas().style.cursor = 'default';
+    }); 
+      map.on("mousemove", "regrouped-kampongs-combined", function(e) {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on("mouseleave", "regrouped-kampongs-combined", function() {
+        map.getCanvas().style.cursor = 'default';
+    }); 
+      map.on("mousemove", "labour-regroupments-pahang", function(e) {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on("mouseleave", "labour-regroupments-pahang", function() {
+        map.getCanvas().style.cursor = 'default';
+    }); 
+    map.on("mousemove", "detention-centers-malaya", function(e) {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on("mouseleave", "detention-centers-malaya", function() {
+        map.getCanvas().style.cursor = 'default';
+    }); 
+    </script>
+  </body>
+</html>
